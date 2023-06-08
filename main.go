@@ -6,7 +6,9 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/iamfio/crud-rest-api/controllers"
+	"github.com/iamfio/crud-rest-api/entities"
+	"github.com/iamfio/crud-rest-api/repos"
+	"github.com/iamfio/crud-rest-api/routers"
 )
 
 func main() {
@@ -15,17 +17,18 @@ func main() {
 	router := mux.NewRouter().StrictSlash(true)
 
 	RegisterProductRoutes(router)
+	RegisterBrandRoutes(router)
 
 	log.Printf("Starting Server on PORT %s\n", AppConfig.Port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", AppConfig.Port), router))
-
 }
 
 func RegisterProductRoutes(router *mux.Router) {
-	var muxBase = "/api/products"
-	router.HandleFunc(muxBase, controllers.GetProducts).Methods("GET")
-	router.HandleFunc(fmt.Sprintf("%s/{id}", muxBase), controllers.GetProductById).Methods("GET")
-	router.HandleFunc(muxBase, controllers.CreateProduct).Methods("POST")
-	router.HandleFunc(fmt.Sprintf("%s/{id}", muxBase), controllers.UpdateProduct).Methods("PUT")
-	router.HandleFunc(fmt.Sprintf("%s/{id}", muxBase), controllers.DeleteProduct).Methods("DELETE")
+	var productRepo repos.GenericRepository[entities.Product] = repos.NewProductRepository()
+	routers.NewGenericRouter[entities.Product, *repos.ProductRepository]("/api/products", router, &productRepo)
+}
+
+func RegisterBrandRoutes(router *mux.Router) {
+	var brandRepo repos.GenericRepository[entities.Brand] = repos.NewBrandRepository()
+	routers.NewGenericRouter[entities.Brand, *repos.BrandRepository]("/api/brands", router, &brandRepo)
 }

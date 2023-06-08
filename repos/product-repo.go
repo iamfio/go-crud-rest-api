@@ -11,7 +11,8 @@ type ProductRepository struct {
 }
 
 func NewProductRepository() *ProductRepository {
-	return &ProductRepository{make([]entities.Product, 0)}
+	var pr = ProductRepository{make([]entities.Product, 0)}
+	return &pr
 }
 
 func (p *ProductRepository) Create(partial entities.Product) entities.Product {
@@ -34,15 +35,16 @@ func (p *ProductRepository) GetOne(id uint) (entities.Product, error) {
 	return entities.Product{}, fmt.Errorf("key '%d' not found", id)
 }
 
-func (p *ProductRepository) Update(id uint, amened entities.Product) (entities.Product, error) {
+func (p *ProductRepository) Update(id uint, ameneded entities.Product) (entities.Product, error) {
 	for i, it := range p.products {
 		if it.ID == id {
-			amened.ID = id
+			ameneded.ID = id
 			p.products = append(p.products[:i], p.products[i+1:]...)
-			return amened, nil
+			p.products = append(p.products, ameneded)
+			return ameneded, nil
 		}
 	}
-	return entities.Product{}, fmt.Errorf("key '%d' not found", amened.ID)
+	return entities.Product{}, fmt.Errorf("key '%d' not found", ameneded.ID)
 }
 
 func (p *ProductRepository) DeleteOne(id uint) (bool, error) {
